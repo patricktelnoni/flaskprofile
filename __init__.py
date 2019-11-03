@@ -4,7 +4,7 @@ from flask_bootstrap import Bootstrap
 from .session_setup import sess
 from .frontend import frontend
 from .nav import nav
-from .model.user import db
+from .model.base import db
 
 def create_app(configfile=None):
     app = Flask(__name__)

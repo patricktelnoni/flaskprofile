@@ -3,7 +3,9 @@ from flask_bootstrap import Bootstrap
 from flask_nav.elements import Navbar, View, Subgroup, Link, Text, Separator
 from .nav import nav
 from .forms import *
+from .model.artikel import *
 from .model.user import *
+
 
 
 frontend = Blueprint('frontend', __name__)
@@ -14,7 +16,8 @@ def top_nav():
     return Navbar(
     View('Flask-Bootstrap', '.index'),
     View('Home', '.index'),
-    View('Logout', '.logout')  if session.get('logged_in') else View('Login', '.example_form'),    
+    View('Logout', '.logout')  if session.get('logged_in') else View('Login', '.form_login'), 
+    View('Artikel', '.artikel'),    
     Subgroup(
         'Docs',
         Link('Flask-Bootstrap', 'http://pythonhosted.org/Flask-Bootstrap'),
@@ -36,13 +39,12 @@ nav.register_element('frontend_top', top_nav)
 def example_form(): 
     form = SignupForm(request.form)
     if request.method == "POST":
-
         admin            = User(
                                 username   = request.form.get('email'),
                                 nama       = request.form.get('name'),
                                 password   = request.form.get('password')                                
                              )         
-        db.create_all() # In case user table doesn't exists already. Else remove it.    
+         # In case user table doesn't exists already. Else remove it.    
         db.session.add(admin)
         db.session.commit()
     return render_template('signup.html', form=form)
@@ -67,7 +69,7 @@ def form_login():
 @frontend.route('/')
 def index():
     if not session.get('logged_in'):
-        return redirect(url_for('form_login'))
+        return redirect('login_form')
     else: 
         return render_template('index.html')
         # return "Sok dah ente lewat"
@@ -78,12 +80,16 @@ def logout():
     session.clear()
     return redirect('login_form')
 
+@frontend.route('/artikel')
+def artikel():
+    db.create_all()
+    artikel_list    = Artikel.query.all()
+    return render_template('artikel.html', data=artikel_list)
+
 @frontend.route('/rundb')
 def rundb():
     admin = User()
     db.create_all() # In case user table doesn't exists already. Else remove it.    
-
     db.session.add(admin)
-
     db.session.commit() 
     return 'sucessfully create table in database'
